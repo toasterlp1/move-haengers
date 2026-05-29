@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPBASE — Gaming Hub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Background Effects Layer -->
+<div id="fx-layer"></div>
+
+<!-- ─── LOGIN ─────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">◆ OPBASE ◆</div>
+    <div class="login-sub">Gaming Operations Hub</div>
+    <form id="login-form" novalidate>
+      <div class="form-row">
+        <label class="form-label" for="callsign">Callsign eingeben</label>
+        <input type="text" id="callsign" name="callsign"
+               placeholder="z.B. Ghost, Soap, Raven…"
+               maxlength="20" autocomplete="off" autofocus required>
+      </div>
+      <div id="login-error" class="login-error"></div>
+      <button type="submit" class="btn primary" style="width:100%; margin-top:14px;">
+        Deploy →
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ─── APP SHELL ─────────────────────────────── -->
+<div id="app">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-mark"><i class="ti ti-crosshair" aria-hidden="true"></i></div>
+      OPBASE
+    </div>
+    <nav class="topbar-nav" aria-label="Hauptnavigation">
+      <button class="nav-btn active" id="nav-dashboard" data-page="dashboard">
+        <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard
+      </button>
+      <button class="nav-btn" id="nav-sessions" data-page="sessions">
+        <i class="ti ti-calendar" aria-hidden="true"></i> Sessions
+      </button>
+      <button class="nav-btn" id="nav-polls" data-page="polls">
+        <i class="ti ti-chart-bar" aria-hidden="true"></i> Abstimmungen
+        <span class="nav-badge hidden" id="polls-badge"></span>
+      </button>
+      <button class="nav-btn" id="nav-crew" data-page="crew">
+        <i class="ti ti-users" aria-hidden="true"></i> Crew
+      </button>
+      <button class="nav-btn" id="nav-library" data-page="library">
+        <i class="ti ti-device-gamepad-2" aria-hidden="true"></i> Bibliothek
+      </button>
+      <button class="nav-btn" id="nav-settings" data-page="settings">
+        <i class="ti ti-settings" aria-hidden="true"></i> Settings
+      </button>
+    </nav>
+    <div class="topbar-user" id="logout-btn" title="Logout">
+      <span id="current-user">–</span>
+      <i class="ti ti-logout" aria-hidden="true" style="font-size:14px;"></i>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ─── DASHBOARD ─────────────────────────── -->
+    <section class="page active" id="page-dashboard" aria-label="Dashboard">
+
+      <div class="dash-stat-grid">
+        <div class="dash-stat">
+          <div class="card-label">Nächste Session</div>
+          <div id="dash-next"><div class="dash-label muted">–</div></div>
+        </div>
+        <div class="dash-stat">
+          <div class="card-label">Crew Online</div>
+          <div class="dash-stat-value" id="dash-online">0</div>
+          <div class="dash-stat-label" id="dash-online-label">von 0 Spielern</div>
+        </div>
+        <div class="dash-stat">
+          <div class="card-label">Offene Abstimmungen</div>
+          <div class="dash-stat-value" id="dash-polls" style="color:var(--danger)">0</div>
+          <div class="dash-stat-label">Stimme jetzt ab</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="section-header">
+            <div class="section-title"><i class="ti ti-calendar-event" aria-hidden="true"></i> Upcoming</div>
+            <button class="btn sm" data-page="sessions">Alle →</button>
+          </div>
+          <div id="dash-sessions"></div>
+        </div>
+        <div>
+          <div class="section-header">
+            <div class="section-title"><i class="ti ti-users" aria-hidden="true"></i> Crew</div>
+            <button class="btn sm" data-page="crew">Alle →</button>
+          </div>
+          <div id="dash-crew"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── SESSIONS ─────────────────────────── -->
+    <section class="page" id="page-sessions" aria-label="Sessions">
+      <div class="section-header">
+        <div class="section-title"><i class="ti ti-calendar" aria-hidden="true"></i> Session Planner</div>
+        <button class="btn primary sm" data-modal-open="session-modal">+ Neue Session</button>
+      </div>
+      <div id="sessions-list"></div>
+    </section>
+
+    <!-- ─── POLLS ────────────────────────────── -->
+    <section class="page" id="page-polls" aria-label="Abstimmungen">
+      <div class="section-header">
+        <div class="section-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Abstimmungen</div>
+        <button class="btn primary sm" data-modal-open="poll-modal">+ Neue Abstimmung</button>
+      </div>
+      <div id="polls-list"></div>
+    </section>
+
+    <!-- ─── CREW ─────────────────────────────── -->
+    <section class="page" id="page-crew" aria-label="Crew">
+      <div class="section-title" style="margin-bottom:20px;"><i class="ti ti-users" aria-hidden="true"></i> Crew</div>
+      <div class="grid-2">
+        <div>
+          <div class="card accent" style="margin-bottom:16px;">
+            <div class="card-label" style="margin-bottom:12px;">Mein Profil</div>
+            <div id="my-profile"></div>
+            <div class="divider"></div>
+            <form id="profile-form" novalidate>
+              <div class="form-row">
+                <label class="form-label" for="status-select">Status</label>
+                <select id="status-select" name="status">
+                  <option value="online">🟢 Online</option>
+                  <option value="busy">🟡 Busy</option>
+                  <option value="offline">⚫ Offline</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label class="form-label" for="bio-input">Bio / Status-Nachricht</label>
+                <textarea id="bio-input" name="bio" placeholder="Was spielst du? Wann bist du dabei?" style="min-height:56px;"></textarea>
+              </div>
+              <button type="submit" class="btn primary sm">Speichern</button>
+            </form>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-label" style="margin-bottom:12px;">Alle Spieler</div>
+            <div id="crew-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── LIBRARY ──────────────────────────── -->
+    <section class="page" id="page-library" aria-label="Game Bibliothek">
+      <div class="section-header">
+        <div class="section-title"><i class="ti ti-device-gamepad-2" aria-hidden="true"></i> Bibliothek</div>
+        <button class="btn primary sm" data-modal-open="game-modal">+ Spiel hinzufügen</button>
+      </div>
+      <div class="genre-filter-row">
+        <input type="text" id="game-search" placeholder="Spiel suchen…" style="max-width:240px;">
+        <select id="genre-filter">
+          <option value="all">Alle Genres</option>
+          <option>Battle Royale</option><option>FPS</option><option>RPG</option>
+          <option>Survival</option><option>Racing</option><option>Strategy</option>
+          <option>Sports</option><option>MMO</option><option>Horror</option>
+          <option>Sonstiges</option>
+        </select>
+      </div>
+      <div id="game-library"></div>
+    </section>
+
+    <!-- ─── SETTINGS ─────────────────────────── -->
+    <section class="page" id="page-settings" aria-label="Einstellungen">
+      <div class="section-title" style="margin-bottom:20px;"><i class="ti ti-settings" aria-hidden="true"></i> Einstellungen</div>
+      <div class="grid-2">
+
+        <!-- Theme -->
+        <div>
+          <div class="card accent" style="margin-bottom:16px;">
+            <div class="card-label" style="margin-bottom:12px;">🎨 Theme & Hintergrund</div>
+
+            <div class="form-row">
+              <div class="form-label">Preset Themes</div>
+              <div class="theme-presets-row" id="theme-presets"></div>
+            </div>
+
+            <div class="divider"></div>
+
+            <form id="custom-theme-form" novalidate>
+              <div class="form-label">Custom Farben</div>
+              <div style="display:flex; gap:12px; align-items:flex-end; margin-top:8px; flex-wrap:wrap;">
+                <div>
+                  <div class="form-label">Hintergrund</div>
+                  <input type="color" id="bg-picker" name="bg" value="#0a0c0e" style="width:56px;">
+                </div>
+                <div>
+                  <div class="form-label">Akzent</div>
+                  <input type="color" id="accent-picker" name="accent" value="#c8a84b" style="width:56px;">
+                </div>
+                <button type="submit" class="btn sm">Anwenden</button>
+              </div>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="form-row">
+              <div class="form-label">Hintergrund-Effekte</div>
+              <div class="effect-row" id="effect-btns"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Discord + Reset -->
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-label" style="margin-bottom:12px;">🔔 Discord Webhook</div>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
+              Erstelle einen Webhook in deinem Discord-Server (Servereinstellungen → Integrationen → Webhooks)
+              und füge die URL hier ein. Bei neuen Sessions und Abstimmungen wird automatisch eine Nachricht gesendet.
+            </p>
+            <form id="webhook-form" novalidate>
+              <div class="form-row">
+                <label class="form-label" for="webhook-input">Webhook URL</label>
+                <input type="url" id="webhook-input" name="url"
+                       placeholder="https://discord.com/api/webhooks/…">
+              </div>
+              <div style="display:flex; gap:8px; margin-top:10px;">
+                <button type="submit" class="btn sm primary">Speichern</button>
+                <button type="button" class="btn sm" id="webhook-test">Test senden</button>
+              </div>
+            </form>
+            <span id="webhook-status" style="font-size:12px; color:var(--muted); margin-top:8px; display:block;">–</span>
+          </div>
+
+          <div class="card danger">
+            <div class="card-label" style="margin-bottom:10px;">⚠ Danger Zone</div>
+            <p style="font-size:12px; color:var(--muted); margin-bottom:12px;">
+              Löscht alle Sessions, Abstimmungen und Bibliotheks-Einträge. Spielerprofile bleiben erhalten.
+            </p>
+            <button class="btn sm danger" id="reset-btn">Alle Daten zurücksetzen</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ─── MODALS ────────────────────────────────── -->
+
+<!-- Session Modal -->
+<div class="modal-overlay" id="session-modal" role="dialog" aria-modal="true" aria-labelledby="session-modal-title">
+  <div class="modal">
+    <div class="modal-title" id="session-modal-title">
+      <i class="ti ti-calendar-plus" aria-hidden="true"></i> Session planen
+    </div>
+    <form id="session-form" novalidate>
+      <div class="form-row">
+        <label class="form-label" for="s-title">Titel *</label>
+        <input type="text" id="s-title" name="title" placeholder="z.B. Warzone Ranked, Minecraft Build Night…" required>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="s-datetime">Datum & Uhrzeit *</label>
+        <input type="datetime-local" id="s-datetime" name="datetime" required>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="s-game">Spiel (optional)</label>
+        <input type="text" id="s-game" name="game" placeholder="z.B. Call of Duty, Minecraft…">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="s-note">Notiz (optional)</label>
+        <textarea id="s-note" name="note" placeholder="Infos für die Crew…"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn sm" data-modal-close="session-modal">Abbrechen</button>
+        <button type="submit" class="btn sm primary">Erstellen + Discord</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Poll Modal -->
+<div class="modal-overlay" id="poll-modal" role="dialog" aria-modal="true" aria-labelledby="poll-modal-title">
+  <div class="modal">
+    <div class="modal-title" id="poll-modal-title">
+      <i class="ti ti-chart-bar" aria-hidden="true"></i> Abstimmung erstellen
+    </div>
+    <form id="poll-form" novalidate>
+      <div class="form-row">
+        <label class="form-label" for="p-question">Frage *</label>
+        <input type="text" id="p-question" name="question" placeholder="z.B. Was zocken wir heute Abend?" required>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="p-opt1">Option 1 *</label>
+        <input type="text" id="p-opt1" name="opt1" placeholder="z.B. Warzone" required>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="p-opt2">Option 2 *</label>
+        <input type="text" id="p-opt2" name="opt2" placeholder="z.B. Minecraft" required>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="p-opt3">Option 3</label>
+        <input type="text" id="p-opt3" name="opt3" placeholder="z.B. GTA RP (optional)">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="p-opt4">Option 4</label>
+        <input type="text" id="p-opt4" name="opt4" placeholder="z.B. Valorant (optional)">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn sm" data-modal-close="poll-modal">Abbrechen</button>
+        <button type="submit" class="btn sm primary">Starten + Discord</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Game Modal -->
+<div class="modal-overlay" id="game-modal" role="dialog" aria-modal="true" aria-labelledby="game-modal-title">
+  <div class="modal">
+    <div class="modal-title" id="game-modal-title">
+      <i class="ti ti-device-gamepad-2" aria-hidden="true"></i> Spiel hinzufügen
+    </div>
+    <form id="game-form" novalidate>
+      <div class="form-row">
+        <label class="form-label" for="g-name">Spielname *</label>
+        <input type="text" id="g-name" name="name" placeholder="z.B. Warzone 2.0" required>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="g-genre">Genre</label>
+        <select id="g-genre" name="genre">
+          <option>Battle Royale</option><option>FPS</option><option>RPG</option>
+          <option>Survival</option><option>Racing</option><option>Strategy</option>
+          <option>Sports</option><option>MMO</option><option>Horror</option>
+          <option>Sonstiges</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="g-players">Max. Spieler</label>
+        <input type="text" id="g-players" name="max_players" placeholder="z.B. 4">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="g-platform">Platform</label>
+        <input type="text" id="g-platform" name="platform" placeholder="z.B. PC, PS5, Xbox…">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn sm" data-modal-close="game-modal">Abbrechen</button>
+        <button type="submit" class="btn sm primary">Hinzufügen</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- Scripts -->
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>
