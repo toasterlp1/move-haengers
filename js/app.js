@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function bindUI() {
   document.getElementById('login-btn').addEventListener('click', doLogin);
   document.getElementById('login-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('password-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
   document.getElementById('open-settings').addEventListener('click', () => openModal('modal-settings'));
   document.getElementById('change-user-btn').addEventListener('click', () => {
@@ -85,7 +86,9 @@ function bindUI() {
 // ---- LOGIN ----
 function doLogin() {
   const name = document.getElementById('login-input').value.trim();
+  const pw = document.getElementById('password-input').value;
   if (!name || name.length < 2) { showToast('Min. 2 Zeichen!', 'error'); return; }
+  if (pw !== 'Mov_e-Haenger.s') { showToast('Wrong password!', 'error'); document.getElementById('password-input').value = ''; return; }
   currentUser = name;
   Store.setUser(name);
   showApp();
