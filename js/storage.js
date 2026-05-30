@@ -147,7 +147,7 @@ const Store = {
       return JSON.parse(localStorage.getItem('gh_settings')) || {
         bg: 'default', primaryColor: '#00ff88', secondaryColor: '#ff0066',
         fxParticles: true, fxScanlines: false, fxGlow: true,
-        fxGlitch: true, discordWebhook: 'https://discord.com/api/webhooks/1510280718662635540/YzDAVM06G3g_dvnZv5XzsEGMMNTMPto3D7cN5wkoDyU2umUQoJ9TteblNzGriyqBPGnt'
+        fxGlitch: true, discordWebhook: 'https://discord.com/api/webhooks/1510344494199865405/dG6X7OmsKN9ox38lYHaGMgZeLKAIpncwFMdOtdamxFKOJB_YMKh2q_qKQ8j2KF0HGitW'
       };
     } catch { return {}; }
   },
