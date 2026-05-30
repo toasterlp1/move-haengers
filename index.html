@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GamingHub 🎮</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="particles"></canvas>
+
+<!-- BACKGROUND OVERLAY -->
+<div id="bg-overlay"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <span class="logo-bracket">[</span>GAMING<span class="logo-accent">HUB</span><span class="logo-bracket">]</span>
+  </div>
+  <div class="nav-user" id="nav-user-area">
+    <span id="nav-username-display"></span>
+    <button id="change-user-btn" class="btn-ghost">⇄ Wechseln</button>
+  </div>
+  <button class="nav-settings-btn" id="open-settings">⚙ SETTINGS</button>
+</nav>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="fullscreen-overlay">
+  <div class="login-box">
+    <div class="login-glitch" data-text="GAMING HUB">GAMING HUB</div>
+    <p class="login-sub">Wer bist du, Krieger?</p>
+    <input type="text" id="login-input" placeholder="Dein Gamertag..." maxlength="20" />
+    <button id="login-btn" class="btn-primary">EINLOGGEN</button>
+    <div class="login-hint">Kein Account nötig — einfach deinen Namen eingeben</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<main id="app" class="hidden">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1 class="hero-title">
+        <span class="hero-greet" id="hero-greet">READY</span>
+        <span class="hero-name" id="hero-name">PLAYER</span>
+      </h1>
+      <p class="hero-sub" id="hero-sub">Was geht heute ab?</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-pill" id="stat-events">
+        <span class="stat-num" id="count-events">0</span>
+        <span class="stat-label">Events</span>
+      </div>
+      <div class="stat-pill" id="stat-polls">
+        <span class="stat-num" id="count-polls">0</span>
+        <span class="stat-label">Umfragen</span>
+      </div>
+      <div class="stat-pill" id="stat-online">
+        <span class="stat-num" id="count-online">1</span>
+        <span class="stat-label">Online</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK ACTIONS -->
+  <section class="quick-actions">
+    <button class="qa-btn" id="qa-event">
+      <span class="qa-icon">📅</span>
+      <span class="qa-label">SESSION PLANEN</span>
+    </button>
+    <button class="qa-btn" id="qa-poll">
+      <span class="qa-icon">🗳️</span>
+      <span class="qa-label">UMFRAGE STARTEN</span>
+    </button>
+    <button class="qa-btn" id="qa-game">
+      <span class="qa-icon">🎮</span>
+      <span class="qa-label">GAME VORSCHLAGEN</span>
+    </button>
+    <button class="qa-btn" id="qa-discord">
+      <span class="qa-icon">📣</span>
+      <span class="qa-label">ALLE PINGEN</span>
+    </button>
+  </section>
+
+  <!-- CONTENT GRID -->
+  <div class="content-grid">
+
+    <!-- EVENTS COLUMN -->
+    <div class="col">
+      <div class="col-header">
+        <h2>⚡ SESSIONS</h2>
+        <span class="col-badge" id="badge-events">0</span>
+      </div>
+      <div class="card-list" id="events-list">
+        <div class="empty-state">Keine Sessions geplant.<br/>Seid ihr lazy?? 😤</div>
+      </div>
+    </div>
+
+    <!-- POLLS COLUMN -->
+    <div class="col">
+      <div class="col-header">
+        <h2>🗳️ UMFRAGEN</h2>
+        <span class="col-badge" id="badge-polls">0</span>
+      </div>
+      <div class="card-list" id="polls-list">
+        <div class="empty-state">Keine aktiven Umfragen.<br/>Starte eine!</div>
+      </div>
+    </div>
+
+    <!-- GAME POOL COLUMN -->
+    <div class="col">
+      <div class="col-header">
+        <h2>🎮 GAME POOL</h2>
+        <span class="col-badge" id="badge-games">0</span>
+      </div>
+      <div class="card-list" id="games-list">
+        <div class="empty-state">Keine Games vorgeschlagen.<br/>Was zocken wir?</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- MODAL: CREATE EVENT -->
+<div class="modal-overlay hidden" id="modal-event">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>⚡ SESSION PLANEN</h3>
+      <button class="modal-close" data-modal="modal-event">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Titel der Session</label>
+      <input type="text" id="event-title" placeholder="z.B. Friday Night Ranked..." />
+      <label>Datum & Uhrzeit</label>
+      <input type="datetime-local" id="event-datetime" />
+      <label>Spiel</label>
+      <input type="text" id="event-game" placeholder="z.B. Valorant, Minecraft..." />
+      <label>Beschreibung (optional)</label>
+      <textarea id="event-desc" placeholder="Was ist der Plan?" rows="3"></textarea>
+      <label>Max. Spieler</label>
+      <input type="number" id="event-maxplayers" min="2" max="20" value="5" />
+      <div class="modal-actions">
+        <button class="btn-cancel" data-modal="modal-event">ABBRECHEN</button>
+        <button class="btn-primary" id="save-event">SESSION ERSTELLEN 🚀</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CREATE POLL -->
+<div class="modal-overlay hidden" id="modal-poll">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🗳️ UMFRAGE ERSTELLEN</h3>
+      <button class="modal-close" data-modal="modal-poll">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Frage</label>
+      <input type="text" id="poll-question" placeholder="z.B. Was zocken wir heute Abend?" />
+      <label>Optionen (min. 2)</label>
+      <div id="poll-options-container">
+        <input type="text" class="poll-option-input" placeholder="Option 1..." />
+        <input type="text" class="poll-option-input" placeholder="Option 2..." />
+      </div>
+      <button class="btn-ghost" id="add-poll-option">+ Option hinzufügen</button>
+      <div class="modal-actions">
+        <button class="btn-cancel" data-modal="modal-poll">ABBRECHEN</button>
+        <button class="btn-primary" id="save-poll">UMFRAGE STARTEN 🗳️</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SUGGEST GAME -->
+<div class="modal-overlay hidden" id="modal-game">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🎮 GAME VORSCHLAGEN</h3>
+      <button class="modal-close" data-modal="modal-game">✕</button>
+    </div>
+    <div class="modal-body">
+      <label>Game Name</label>
+      <input type="text" id="game-name" placeholder="z.B. Elden Ring, Warzone..." />
+      <label>Genre</label>
+      <select id="game-genre">
+        <option value="Shooter">🔫 Shooter</option>
+        <option value="MOBA">⚔️ MOBA</option>
+        <option value="RPG">🐉 RPG</option>
+        <option value="Survival">🏕️ Survival</option>
+        <option value="Racing">🏎️ Racing</option>
+        <option value="Sports">⚽ Sports</option>
+        <option value="Strategy">🧠 Strategy</option>
+        <option value="Sonstiges">🎲 Sonstiges</option>
+      </select>
+      <label>Spieleranzahl</label>
+      <input type="text" id="game-players" placeholder="z.B. 2-5 Spieler" />
+      <label>Kommentar (optional)</label>
+      <textarea id="game-comment" placeholder="Warum sollten wir das zocken?" rows="2"></textarea>
+      <div class="modal-actions">
+        <button class="btn-cancel" data-modal="modal-game">ABBRECHEN</button>
+        <button class="btn-primary" id="save-game">VORSCHLAGEN 🎮</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SETTINGS -->
+<div class="modal-overlay hidden" id="modal-settings">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h3>⚙️ EINSTELLUNGEN</h3>
+      <button class="modal-close" data-modal="modal-settings">✕</button>
+    </div>
+    <div class="modal-body">
+      <h4>🎨 HINTERGRUND</h4>
+      <div class="bg-presets">
+        <button class="bg-preset" data-bg="default" style="background: linear-gradient(135deg, #0a0a0f, #0d1117)">Default</button>
+        <button class="bg-preset" data-bg="neon" style="background: linear-gradient(135deg, #0a0020, #001a3a)">Neon</button>
+        <button class="bg-preset" data-bg="forest" style="background: linear-gradient(135deg, #0a1f0a, #001a00)">Forest</button>
+        <button class="bg-preset" data-bg="blood" style="background: linear-gradient(135deg, #1a0000, #200005)">Blood</button>
+        <button class="bg-preset" data-bg="gold" style="background: linear-gradient(135deg, #1a1000, #1a0800)">Gold</button>
+        <button class="bg-preset" data-bg="void" style="background: #050508">Void</button>
+      </div>
+
+      <h4>🎨 EIGENE FARBE</h4>
+      <div class="color-row">
+        <label>Primärfarbe</label>
+        <input type="color" id="color-primary" value="#00ff88" />
+        <label>Sekundärfarbe</label>
+        <input type="color" id="color-secondary" value="#ff0066" />
+      </div>
+
+      <h4>✨ EFFEKTE</h4>
+      <div class="effects-grid">
+        <label class="toggle-label">
+          <input type="checkbox" id="fx-particles" checked /> Partikel
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="fx-scanlines" /> Scanlines
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="fx-glow" checked /> Glow-Effekte
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="fx-glitch" checked /> Glitch-Text
+        </label>
+      </div>
+
+      <h4>🔔 DISCORD WEBHOOK</h4>
+      <p class="settings-hint">Füge deinen Discord Webhook ein, um Benachrichtigungen zu erhalten wenn jemand eine Umfrage startet oder eine Session plant.</p>
+      <input type="text" id="discord-webhook" placeholder="https://discord.com/api/webhooks/..." />
+      <div class="webhook-help">
+        <a href="https://support.discord.com/hc/de/articles/228383668" target="_blank">Wie erstelle ich einen Webhook? ↗</a>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-primary" id="save-settings">SPEICHERN ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toast-container"></div>
+
+<!-- SCANLINES OVERLAY -->
+<div id="scanlines" class="hidden"></div>
+
+<script src="js/storage.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
