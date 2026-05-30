@@ -348,7 +348,7 @@ function saveSettings() {
 function applySettings(s) {
   document.documentElement.style.setProperty('--primary', s.primaryColor || '#00ff88');
   document.documentElement.style.setProperty('--secondary', s.secondaryColor || '#ff0066');
-  applyBg(s.bg || 'default', false);
+  applyBg(s.bg || 'rooftop', false);
   ParticleSystem.setColor(s.primaryColor || '#00ff88');
   ParticleSystem.setEnabled(s.fxParticles !== false);
   document.getElementById('scanlines').classList.toggle('hidden', !s.fxScanlines);
@@ -357,15 +357,7 @@ function applySettings(s) {
 }
 
 function applyBg(bg, updateBtn = true) {
-  const bgMap = {
-    default: 'radial-gradient(ellipse at 30% 20%, rgba(0,255,136,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(0,204,255,0.04) 0%, transparent 60%)',
-    neon: 'radial-gradient(ellipse at 20% 50%, rgba(150,0,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 50%, rgba(0,100,255,0.08) 0%, transparent 60%)',
-    forest: 'radial-gradient(ellipse at 50% 0%, rgba(0,200,50,0.08) 0%, transparent 70%)',
-    blood: 'radial-gradient(ellipse at 50% 100%, rgba(200,0,30,0.1) 0%, transparent 60%)',
-    gold: 'radial-gradient(ellipse at 50% 0%, rgba(255,180,0,0.08) 0%, transparent 70%)',
-    void: 'none'
-  };
-  document.getElementById('bg-overlay').style.background = bgMap[bg] || bgMap.default;
+  Backgrounds.apply(bg);
   if (updateBtn) document.querySelectorAll('.bg-preset').forEach(btn => btn.classList.toggle('active', btn.dataset.bg === bg));
 }
 
