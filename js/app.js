@@ -105,6 +105,14 @@ function showApp() {
     h < 6 ? 'Night shift? Lets go' :
     h < 12 ? 'Morning session?' :
     h < 18 ? 'Afternoon round?' : 'Evening session?';
+
+  // Start heartbeat
+  Store.heartbeat(currentUser);
+  setInterval(() => Store.heartbeat(currentUser), 60000);
+
+  // Go offline on tab close
+  window.addEventListener('beforeunload', () => Store.goOffline(currentUser));
+
   renderAll();
   loadSettingsForm();
 }
@@ -311,9 +319,10 @@ async function deleteGame(id) {
 // ---- STATS ----
 async function updateStats() {
   try {
-    const [events, polls] = await Promise.all([Store.getEvents(), Store.getPolls()]);
+    const [events, polls, online] = await Promise.all([Store.getEvents(), Store.getPolls(), Store.getOnlineUsers()]);
     document.getElementById('count-events').textContent = events.length;
     document.getElementById('count-polls').textContent = polls.length;
+    document.getElementById('count-online').textContent = online.length;
   } catch {}
 }
 
