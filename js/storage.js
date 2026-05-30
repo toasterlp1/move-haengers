@@ -1,161 +1,171 @@
 /* =============================================
-   GAMING HUB — STORAGE MANAGER
-   Handles localStorage persistence & auto-cleanup
+   GAMING HUB — SUPABASE STORAGE
    ============================================= */
 
-const Store = (() => {
-  const KEYS = {
-    events: 'gh_events',
-    polls: 'gh_polls',
-    games: 'gh_games',
-    settings: 'gh_settings',
-    user: 'gh_user',
-    votes: 'gh_votes'
-  };
+const SUPABASE_URL = 'https://cfrbvllagteihxbfswvp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0rHIRheDwibV3EcARZipGw_VfQHso-d';
 
-  const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+const headers = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
 
-  function _get(key) {
-    try {
-      return JSON.parse(localStorage.getItem(key)) || [];
-    } catch { return []; }
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+
+async function sb(path, options = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: { ...headers, ...(options.headers || {}) },
+    ...options
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
   }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
 
-  function _getObj(key, def = {}) {
-    try {
-      return JSON.parse(localStorage.getItem(key)) || def;
-    } catch { return def; }
-  }
+function cutoff() {
+  return new Date(Date.now() - THREE_DAYS_MS).toISOString();
+}
 
-  function _set(key, val) {
-    localStorage.setItem(key, JSON.stringify(val));
-  }
+const Store = {
 
-  function _purgeOld(items) {
-    const now = Date.now();
-    return items.filter(item => {
-      if (!item.createdAt) return true;
-      return (now - item.createdAt) < THREE_DAYS_MS;
+  // ---- EVENTS ----
+  async getEvents() {
+    return await sb(`events?created_at=gte.${cutoff()}&order=datetime.asc`);
+  },
+  async addEvent(ev) {
+    return await sb('events', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: ev.title,
+        datetime: ev.datetime,
+        game: ev.game || null,
+        description: ev.desc || null,
+        max_players: ev.maxPlayers || 5,
+        creator: ev.creator,
+        rsvps: {}
+      })
     });
-  }
-
-  function cleanupOldData() {
-    ['events', 'polls', 'games'].forEach(k => {
-      const items = _get(KEYS[k]);
-      const cleaned = _purgeOld(items);
-      if (cleaned.length !== items.length) _set(KEYS[k], cleaned);
+  },
+  async deleteEvent(id) {
+    return await sb(`events?id=eq.${id}`, { method: 'DELETE' });
+  },
+  async rsvpEvent(eventId, username, status) {
+    const events = await sb(`events?id=eq.${eventId}`);
+    if (!events || !events.length) return;
+    const ev = events[0];
+    const rsvps = ev.rsvps || {};
+    rsvps[username] = status;
+    return await sb(`events?id=eq.${eventId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ rsvps })
     });
-  }
+  },
 
-  // EVENTS
-  function getEvents() { return _purgeOld(_get(KEYS.events)); }
-  function addEvent(ev) {
-    const events = getEvents();
-    events.push({ ...ev, id: Date.now(), createdAt: Date.now() });
-    _set(KEYS.events, events);
-    return events;
-  }
-  function deleteEvent(id) {
-    const events = getEvents().filter(e => e.id !== id);
-    _set(KEYS.events, events);
-    return events;
-  }
-  function rsvpEvent(eventId, username, status) {
-    const events = getEvents();
-    const ev = events.find(e => e.id === eventId);
-    if (!ev) return events;
-    if (!ev.rsvps) ev.rsvps = {};
-    ev.rsvps[username] = status;
-    _set(KEYS.events, events);
-    return events;
-  }
-
-  // POLLS
-  function getPolls() { return _purgeOld(_get(KEYS.polls)); }
-  function addPoll(poll) {
-    const polls = getPolls();
-    polls.push({ ...poll, id: Date.now(), createdAt: Date.now() });
-    _set(KEYS.polls, polls);
-    return polls;
-  }
-  function deletePoll(id) {
-    const polls = getPolls().filter(p => p.id !== id);
-    _set(KEYS.polls, polls);
-    return polls;
-  }
-  function votePoll(pollId, optionIndex, username) {
-    const polls = getPolls();
-    const poll = polls.find(p => p.id === pollId);
-    if (!poll) return polls;
-    if (!poll.votes) poll.votes = {};
-    // remove old vote from this user
-    Object.keys(poll.votes).forEach(k => {
-      if (poll.votes[k] === username) delete poll.votes[k];
+  // ---- POLLS ----
+  async getPolls() {
+    return await sb(`polls?created_at=gte.${cutoff()}&order=created_at.desc`);
+  },
+  async addPoll(poll) {
+    return await sb('polls', {
+      method: 'POST',
+      body: JSON.stringify({
+        question: poll.question,
+        options: poll.options,
+        votes: {},
+        creator: poll.creator
+      })
     });
-    poll.votes[`${optionIndex}_${username}_${Date.now()}`] = { optionIndex, username };
-    _set(KEYS.polls, polls);
-    return polls;
-  }
-  function getUserVoteForPoll(pollId, username) {
-    const polls = getPolls();
-    const poll = polls.find(p => p.id === pollId);
+  },
+  async deletePoll(id) {
+    return await sb(`polls?id=eq.${id}`, { method: 'DELETE' });
+  },
+  async votePoll(pollId, optionIndex, username) {
+    const polls = await sb(`polls?id=eq.${pollId}`);
+    if (!polls || !polls.length) return;
+    const poll = polls[0];
+    const votes = poll.votes || {};
+    // Remove previous vote from this user
+    Object.keys(votes).forEach(k => {
+      if (votes[k] && votes[k].username === username) delete votes[k];
+    });
+    votes[`${optionIndex}_${username}_${Date.now()}`] = { optionIndex, username };
+    return await sb(`polls?id=eq.${pollId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ votes })
+    });
+  },
+  getUserVoteForPoll(poll, username) {
     if (!poll || !poll.votes) return null;
     const entry = Object.values(poll.votes).find(v => v && v.username === username);
     return entry ? entry.optionIndex : null;
-  }
+  },
 
-  // GAMES
-  function getGames() { return _purgeOld(_get(KEYS.games)); }
-  function addGame(game) {
-    const games = getGames();
-    games.push({ ...game, id: Date.now(), createdAt: Date.now(), votes: [] });
-    _set(KEYS.games, games);
-    return games;
-  }
-  function deleteGame(id) {
-    const games = getGames().filter(g => g.id !== id);
-    _set(KEYS.games, games);
-    return games;
-  }
-  function voteGame(gameId, username) {
-    const games = getGames();
-    const game = games.find(g => g.id === gameId);
-    if (!game) return games;
-    if (!game.votes) game.votes = [];
-    if (game.votes.includes(username)) {
-      game.votes = game.votes.filter(u => u !== username);
+  // ---- GAMES ----
+  async getGames() {
+    return await sb(`games?created_at=gte.${cutoff()}&order=created_at.desc`);
+  },
+  async addGame(game) {
+    return await sb('games', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: game.name,
+        genre: game.genre || null,
+        players: game.players || null,
+        comment: game.comment || null,
+        creator: game.creator,
+        votes: []
+      })
+    });
+  },
+  async deleteGame(id) {
+    return await sb(`games?id=eq.${id}`, { method: 'DELETE' });
+  },
+  async voteGame(gameId, username) {
+    const games = await sb(`games?id=eq.${gameId}`);
+    if (!games || !games.length) return;
+    const game = games[0];
+    let votes = game.votes || [];
+    if (votes.includes(username)) {
+      votes = votes.filter(u => u !== username);
     } else {
-      game.votes.push(username);
+      votes.push(username);
     }
-    _set(KEYS.games, games);
-    return games;
-  }
+    return await sb(`games?id=eq.${gameId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ votes })
+    });
+  },
 
-  // SETTINGS
-  function getSettings() {
-    return _getObj(KEYS.settings, {
-      bg: 'default',
-      primaryColor: '#00ff88',
-      secondaryColor: '#ff0066',
-      fxParticles: true,
-      fxScanlines: false,
-      fxGlow: true,
-      fxGlitch: true,
-      discordWebhook: ''
+  // ---- SETTINGS (bleibt localStorage) ----
+  getSettings() {
+    try {
+      return JSON.parse(localStorage.getItem('gh_settings')) || {
+        bg: 'default', primaryColor: '#00ff88', secondaryColor: '#ff0066',
+        fxParticles: true, fxScanlines: false, fxGlow: true,
+        fxGlitch: true, discordWebhook: ''
+      };
+    } catch { return {}; }
+  },
+  saveSettings(s) { localStorage.setItem('gh_settings', JSON.stringify(s)); },
+
+  // ---- USER (bleibt localStorage) ----
+  getUser() { return localStorage.getItem('gh_user') || ''; },
+  setUser(name) { localStorage.setItem('gh_user', name); },
+
+  // Realtime subscription
+  subscribeToChanges(callback) {
+    const tables = ['events', 'polls', 'games'];
+    tables.forEach(table => {
+      const es = new EventSource(
+        `${SUPABASE_URL}/realtime/v1/api?event=*&schema=public&table=${table}`,
+        { headers: { apikey: SUPABASE_KEY } }
+      );
+      es.onmessage = () => callback();
     });
   }
-  function saveSettings(s) { _set(KEYS.settings, s); }
-
-  // USER
-  function getUser() { return localStorage.getItem(KEYS.user) || ''; }
-  function setUser(name) { localStorage.setItem(KEYS.user, name); }
-
-  return {
-    getEvents, addEvent, deleteEvent, rsvpEvent,
-    getPolls, addPoll, deletePoll, votePoll, getUserVoteForPoll,
-    getGames, addGame, deleteGame, voteGame,
-    getSettings, saveSettings,
-    getUser, setUser,
-    cleanupOldData
-  };
-})();
+};
