@@ -2,39 +2,32 @@ const Backgrounds = (() => {
 
   const themes = {
     rooftop: {
-      // Person auf Rooftop, Nachtstadt Skyline im Hintergrund, NYC-style
-      url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1920&q=85&fit=crop&crop=center',
-      overlay: 'rgba(3,2,12,0.45)',
+      url: 'assets/rooftop.jpg',
+      overlay: 'rgba(3,2,12,0.35)',
     },
     autumn: {
-      // Schwarze Katze auf nassem Pflaster mit Herbstblättern — genau dein Foto-Vibe
-      url: 'https://images.unsplash.com/photo-1508193638397-1c4234db14d8?w=1920&q=85&fit=crop&crop=center',
-      overlay: 'rgba(8,4,0,0.4)',
+      url: 'assets/autumn.jpg',
+      overlay: 'rgba(8,4,0,0.3)',
     },
     forest: {
-      // Dunkler mystischer Wald mit Sonnenlicht durch Bäume
-      url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=85&fit=crop&crop=center',
+      url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=85&fit=crop',
       overlay: 'rgba(1,6,2,0.45)',
     },
     library: {
-      // Alte Bibliothek mit Gewölbe und warmem Licht — genau wie dein Bild
-      url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&q=85&fit=crop&crop=center',
+      url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&q=85&fit=crop',
       overlay: 'rgba(6,4,1,0.45)',
     },
     neon: {
-      // Nasse Nachtstraße mit Neon-Reflektionen auf dem Asphalt
-      url: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=1920&q=85&fit=crop&crop=center',
-      overlay: 'rgba(2,0,10,0.45)',
+      url: 'assets/neon.jpg',
+      overlay: 'rgba(2,0,10,0.3)',
     },
     blood: {
-      // Dunkle rote Nacht, bedrohlich, leer
-      url: 'https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=1920&q=85&fit=crop&crop=center',
-      overlay: 'rgba(12,0,0,0.55)',
+      url: 'assets/blood.jpg',
+      overlay: 'rgba(5,0,0,0.3)',
     },
     graffiti: {
-      // Jemand sitzt auf einer Mauer mit Graffiti bei Nacht — genau dein Bild
-      url: 'https://images.unsplash.com/photo-1509023464722-18d996393ca8?w=1920&q=85&fit=crop&crop=center',
-      overlay: 'rgba(4,4,6,0.5)',
+      url: 'assets/graffiti.jpg',
+      overlay: 'rgba(4,2,4,0.35)',
     },
     void: {
       url: null,
