@@ -10,12 +10,12 @@ const Backgrounds = (() => {
       overlay: 'rgba(8,4,0,0.3)',
     },
     forest: {
-      url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=85&fit=crop',
-      overlay: 'rgba(1,6,2,0.45)',
+      url: 'assets/forest.jpg',
+      overlay: 'rgba(1,4,6,0.3)',
     },
     library: {
-      url: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&q=85&fit=crop',
-      overlay: 'rgba(6,4,1,0.45)',
+      url: 'assets/library.jpg',
+      overlay: 'rgba(6,2,2,0.3)',
     },
     neon: {
       url: 'assets/neon.jpg',
