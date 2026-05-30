@@ -1310,3 +1310,42 @@ body.bg-void #bg-overlay {
 .bg-preset[data-bg="blood"]::after { background: linear-gradient(90deg, #cc0000, #440000); }
 .bg-preset[data-bg="graffiti"]::after { background: linear-gradient(90deg, #00c864, #ffdc00); }
 .bg-preset[data-bg="void"]::after { background: linear-gradient(90deg, #333, #666); }
+
+/* =============================================
+   PHOTO BACKGROUNDS
+   ============================================= */
+body {
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+body.bg-void {
+  background: #000 !important;
+}
+
+/* Darken cards slightly so text bleibt lesbar über Fotos */
+.event-card, .poll-card, .game-card {
+  background: rgba(5,5,10,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.modal {
+  background: rgba(8,8,14,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+#navbar {
+  background: rgba(5,5,10,0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.login-box {
+  background: rgba(5,5,10,0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
